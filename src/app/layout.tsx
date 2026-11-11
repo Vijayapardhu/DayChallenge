@@ -1,38 +1,24 @@
 import type { Metadata, Viewport } from "next";
-import { Bebas_Neue, Outfit, Playfair_Display, Space_Mono } from "next/font/google";
+import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
-const bebas = Bebas_Neue({
-  weight: "400",
+const inter = Inter({
   subsets: ["latin"],
-  variable: "--font-bebas",
+  variable: "--font-inter",
   display: "swap",
 });
 
-const outfit = Outfit({
+const jetbrains = JetBrains_Mono({
   subsets: ["latin"],
-  variable: "--font-outfit",
-  display: "swap",
-});
-
-const playfair = Playfair_Display({
-  subsets: ["latin"],
-  style: ["normal", "italic"],
-  variable: "--font-playfair",
-  display: "swap",
-});
-
-const spaceMono = Space_Mono({
-  weight: ["400", "700"],
-  subsets: ["latin"],
-  variable: "--font-spacemono",
+  weight: ["400", "500"],
+  variable: "--font-jetbrains",
   display: "swap",
 });
 
 export const metadata: Metadata = {
   title: "Can I Vibecode It? — One-Day Challenge Roulette",
   description:
-    "Spin a mechanical roulette to get a small, satisfying coding project you can ship in 1–8 hours with an AI coding assistant. 115 curated builds, MVP checklists, and ready-to-paste AI prompts.",
+    "Spin a roulette to get a small, satisfying coding project you can ship in 1–8 hours with an AI coding assistant. 111 curated builds, MVP checklists, and ready-to-paste AI prompts.",
   applicationName: "Can I Vibecode It?",
   keywords: [
     "vibecoding",
@@ -52,16 +38,16 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0a0705",
-  colorScheme: "dark",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#09090b" },
+  ],
+  colorScheme: "light dark",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html
-      lang="en"
-      className={`${bebas.variable} ${outfit.variable} ${playfair.variable} ${spaceMono.variable}`}
-    >
+    <html lang="en" className={`${inter.variable} ${jetbrains.variable}`}>
       <body>{children}</body>
     </html>
   );

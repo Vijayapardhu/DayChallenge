@@ -1,10 +1,16 @@
-# Can I Vibecode It? 🎰
+# Can I Vibecode It?
 
 A **one-day coding challenge roulette**. Pull the lever, let the reel decide, and walk away with a small, polished project you can actually ship in a single sitting with an AI coding assistant.
 
-Live: **https://vijayapardhu.github.io/DayChallenge/**
+Live: **https://vijayaapardhu.dev/DayChallenge/**
 
 ---
+
+## Design
+
+Deliberately **monochrome and minimal** — black, white and a few greys, hairline borders, no colour accents, no glows or gradients. Type does the work: one neutral sans for the interface, one mono for labels and numbers.
+
+It follows your system theme automatically and stays strictly monochrome in both — white on black, or black on white.
 
 ## What it is
 
@@ -39,7 +45,7 @@ Each challenge ships with:
 | ---------- | --------------------------------------- |
 | Framework  | Next.js 16 (App Router) + React 19      |
 | Language   | TypeScript                              |
-| Styling    | Tailwind CSS v4 + a hand-written token layer |
+| Styling    | Tailwind CSS v4 + a hand-written monochrome token layer |
 | Motion     | Framer Motion                           |
 | Icons      | lucide-react                            |
 | Audio      | Web Audio API (no audio files)          |
@@ -76,7 +82,7 @@ Pushing to `main` triggers [`.github/workflows/deploy.yml`](.github/workflows/de
 ```
 src/
   app/                 # layout, page, and the design system (globals.css)
-  components/          # reel, lever, result card, panels, modal, particles…
+  components/          # reel, lever, result card, panels, modal…
   data/challenges.ts   # 111 curated one-day builds
   lib/
     roulette.ts        # spin physics + strip maths

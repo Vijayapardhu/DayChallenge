@@ -22,7 +22,7 @@ export function CategoryFilter({ value, onChange }: CategoryFilterProps) {
   }
 
   const items: Array<{ id: Filter; label: string; count: number; accent: string }> = [
-    { id: "all", label: "All Categories", count: allChallenges.length, accent: "#ffb545" },
+    { id: "all", label: "All Categories", count: allChallenges.length, accent: "var(--accent)" },
     ...CATEGORIES.map((c) => ({
       id: c.id as Filter,
       label: c.label,

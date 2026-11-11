@@ -11,7 +11,10 @@ export interface Category {
   id: CategoryId;
   label: string;
   short: string;
-  /** Tailwind-ready accent colour (hex) used for glows + chips. */
+  /**
+   * Monochrome tone token. Categories are not hue-coded — the label and icon
+   * carry the meaning — so this stays neutral in both themes.
+   */
   accent: string;
   blurb: string;
 }
@@ -61,35 +64,35 @@ export const CATEGORIES: Category[] = [
     id: "mini-games",
     label: "Mini Games",
     short: "Games",
-    accent: "#ff8a3d",
+    accent: "var(--accent)",
     blurb: "Playable in a browser tab, fun in 90 seconds.",
   },
   {
     id: "app-clones",
     label: "App Clones",
     short: "Clones",
-    accent: "#ff5f6d",
+    accent: "var(--accent)",
     blurb: "The recognisable interface, built small.",
   },
   {
     id: "systems",
     label: "Systems",
     short: "Systems",
-    accent: "#ffb545",
+    accent: "var(--accent)",
     blurb: "Tools, editors and little machines.",
   },
   {
     id: "cool-features",
     label: "Cool Features",
     short: "Features",
-    accent: "#63d9c2",
+    accent: "var(--accent)",
     blurb: "One delightful interaction, done beautifully.",
   },
   {
     id: "experiments",
     label: "Experiments",
     short: "Labs",
-    accent: "#c08bff",
+    accent: "var(--accent)",
     blurb: "Visual toys, simulations and generative play.",
   },
 ];
@@ -103,9 +106,9 @@ export const CATEGORY_MAP: Record<CategoryId, Category> = CATEGORIES.reduce(
 );
 
 export const DIFFICULTY_ACCENT: Record<Difficulty, string> = {
-  Easy: "#63d9c2",
-  Medium: "#ffb545",
-  Hard: "#ff5f6d",
+  Easy: "var(--faint)",
+  Medium: "var(--muted)",
+  Hard: "var(--ink-2)",
 };
 
 export type CategoryFilter = CategoryId | "all";

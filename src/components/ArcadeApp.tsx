@@ -19,7 +19,6 @@ import { CategoryFilter } from "@/components/CategoryFilter";
 import { CompletedPanel } from "@/components/CompletedPanel";
 import { HistoryPanel } from "@/components/HistoryPanel";
 import { Lever } from "@/components/Lever";
-import { Particles } from "@/components/Particles";
 import { PromptModal } from "@/components/PromptModal";
 import { ResultCard } from "@/components/ResultCard";
 import { RouletteReel, type SpinRequest } from "@/components/RouletteReel";
@@ -76,7 +75,6 @@ export function ArcadeApp() {
   const [itemHeight, setItemHeight] = useState(72);
   const [spinRequest, setSpinRequest] = useState<SpinRequest | null>(null);
   const [spinning, setSpinning] = useState(false);
-  const [confettiToken, setConfettiToken] = useState(0);
   const [promptChallenge, setPromptChallenge] = useState<Challenge | null>(null);
   const [tab, setTab] = useState<Tab>("library");
   const [daily, setDaily] = useState<Challenge | null>(null);
@@ -175,7 +173,6 @@ export function ArcadeApp() {
       markSeen([target.id]);
       spinningRef.current = false;
       setSpinning(false);
-      setConfettiToken((n) => n + 1);
     },
     [markSeen, recordSpin, setResult],
   );
@@ -269,9 +266,6 @@ export function ArcadeApp() {
 
   return (
     <div className="arcade-shell">
-      <Particles reducedMotion={reducedMotion} />
-      <div className="arcade-veil" aria-hidden />
-
       <div className="arcade-content">
         <header className="arcade-header">
           <div className="brand">
@@ -324,17 +318,6 @@ export function ArcadeApp() {
           ref={machineRef}
           aria-label="Challenge roulette machine"
         >
-          <span className="machine-screws" aria-hidden />
-          <div className="machine-bulbs" aria-hidden>
-            {Array.from({ length: 14 }).map((_, i) => (
-              <span
-                key={i}
-                className="bulb"
-                style={{ animationDelay: `${i * 0.12}s` }}
-              />
-            ))}
-          </div>
-
           <div className="machine-plate">
             <span>Vibecode Roulette</span>
             <em>
@@ -345,9 +328,6 @@ export function ArcadeApp() {
 
           <div className="machine-main">
             <div className="reel-shell">
-              <span className="reel-side-label reel-side-label-left" aria-hidden>
-                Spin
-              </span>
               <RouletteReel
                 pool={pool}
                 spinRequest={spinRequest}
@@ -358,9 +338,6 @@ export function ArcadeApp() {
                 onSlowdown={() => getSound().slowdown()}
                 onComplete={handleComplete}
               />
-              <span className="reel-side-label reel-side-label-right" aria-hidden>
-                Build
-              </span>
               <span className="reel-swipe-hint" aria-hidden>
                 pull the lever or tap spin
               </span>
@@ -424,7 +401,6 @@ export function ArcadeApp() {
               <ResultCard
                 key={result.at}
                 result={result}
-                confettiToken={confettiToken}
                 reducedMotion={reducedMotion}
                 onSpinAgain={handleSpinAgain}
                 onGeneratePrompt={(c) => setPromptChallenge(c)}

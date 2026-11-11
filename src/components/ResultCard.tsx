@@ -13,7 +13,6 @@ import {
   Wand2,
 } from "lucide-react";
 import { CategoryIcon } from "@/components/CategoryIcon";
-import { ConfettiBurst } from "@/components/ConfettiBurst";
 import { useCopy } from "@/hooks/useCopy";
 import { buildChallengeSummary } from "@/lib/prompt";
 import { useApp, type SpinResult } from "@/lib/store";
@@ -29,7 +28,6 @@ const MODE_LABEL: Record<SpinMode, string> = {
 
 interface ResultCardProps {
   result: SpinResult;
-  confettiToken: number;
   reducedMotion: boolean;
   onSpinAgain: () => void;
   onGeneratePrompt: (challenge: Challenge) => void;
@@ -37,7 +35,6 @@ interface ResultCardProps {
 
 export function ResultCard({
   result,
-  confettiToken,
   reducedMotion,
   onSpinAgain,
   onGeneratePrompt,
@@ -74,9 +71,7 @@ export function ResultCard({
       }
       style={{ transformPerspective: 1200 }}
     >
-      <ConfettiBurst fire={confettiToken} reducedMotion={reducedMotion} />
-
-      <div className="result-rail" style={{ background: cat.accent }} aria-hidden />
+      <div className="result-rail" aria-hidden />
 
       <header className="result-head">
         <div className="result-chips">
