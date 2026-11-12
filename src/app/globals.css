@@ -11,46 +11,26 @@
 }
 
 :root {
-  color-scheme: light;
+  color-scheme: dark;
 
   /* Pure monochrome. Every value is a neutral grey (r = g = b). */
-  --bg: #ffffff;
-  --surface: #fafafa;
-  --surface-2: #f5f5f5;
-  --line: #e5e5e5;
-  --line-2: #d4d4d4;
-  --ink: #0a0a0a;
-  --ink-2: #404040;
-  --muted: #737373;
-  --faint: #a3a3a3;
-  --on-ink: #fafafa;
+  --bg: #0a0a0a;
+  --surface: #141414;
+  --surface-2: #1f1f1f;
+  --line: #262626;
+  --line-2: #404040;
+  --ink: #fafafa;
+  --ink-2: #d4d4d4;
+  --muted: #a3a3a3;
+  --faint: #737373;
+  --on-ink: #0a0a0a;
 
   --accent: var(--ink-2);
 
   --radius: 10px;
   --radius-lg: 14px;
-  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --shadow-2: 0 4px 16px -6px rgba(0, 0, 0, 0.12);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    color-scheme: dark;
-
-    --bg: #0a0a0a;
-    --surface: #141414;
-    --surface-2: #1f1f1f;
-    --line: #262626;
-    --line-2: #404040;
-    --ink: #fafafa;
-    --ink-2: #d4d4d4;
-    --muted: #a3a3a3;
-    --faint: #737373;
-    --on-ink: #0a0a0a;
-
-    --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
-    --shadow-2: 0 4px 16px -6px rgba(0, 0, 0, 0.6);
-  }
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-2: 0 4px 16px -6px rgba(0, 0, 0, 0.6);
 }
 
 /* ------------------------------------------------------------------ */
@@ -108,80 +88,336 @@ button {
 }
 
 /* ------------------------------------------------------------------ */
-/* Shell                                                               */
+/* Stage — the card reel owns the screen                               */
 /* ------------------------------------------------------------------ */
 .arcade-shell {
   position: relative;
   min-height: 100dvh;
 }
 
-/* Decorative layer removed for the minimal look; kept as a hook. */
-.arcade-veil {
-  display: none;
-}
-
-.arcade-content {
-  width: 100%;
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 40px 20px 80px;
+.stage {
+  position: relative;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
-  gap: 28px;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(18px, 3vh, 34px);
+  padding: 76px 20px 40px;
 }
 
-/* ------------------------------------------------------------------ */
-/* Header                                                              */
-/* ------------------------------------------------------------------ */
-.arcade-header {
+/* Top bar: brand on the left, controls on the right. */
+.stage-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 20;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  flex-wrap: wrap;
+  padding: 22px clamp(20px, 3vw, 36px);
 }
 
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-width: 0;
-}
-
-.brand-mark {
+.stage-logo {
   display: grid;
   place-items: center;
-  width: 34px;
-  height: 34px;
-  flex: none;
-  border-radius: 9px;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
   border: 1px solid var(--line);
   background: var(--surface);
   color: var(--ink);
 }
 
-.brand-text {
-  min-width: 0;
+.stage-tools {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-.brand-title {
-  font-family: var(--font-sans);
-  font-size: 19px;
-  font-weight: 600;
-  letter-spacing: -0.015em;
-  line-height: 1.2;
+.stage-toggle {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--muted);
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+.stage-toggle:hover {
+  color: var(--ink);
+  border-color: var(--line-2);
+  background: var(--surface-2);
+}
+
+.stage-inner {
+  width: 100%;
+  max-width: 1100px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(16px, 2.6vh, 28px);
+}
+
+.stage-head {
+  text-align: center;
+}
+
+.stage-title {
   margin: 0;
+  font-size: clamp(30px, 5.4vw, 62px);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1.05;
   color: var(--ink);
 }
 
-.brand-sub {
-  margin: 1px 0 0;
+.stage-sub {
+  margin: 12px 0 0;
+  font-size: clamp(14px, 1.5vw, 19px);
+  color: var(--muted);
+}
+/* ------------------------------------------------------------------ */
+/* The reel — a row of cards curving away from the centre              */
+/* ------------------------------------------------------------------ */
+.reel {
+  position: relative;
+  width: 100%;
+  height: clamp(240px, 38vh, 380px);
+  display: grid;
+  place-items: center;
+  perspective: 1400px;
+  perspective-origin: 50% 50%;
+  /* The fan is wider than the reel; clip it so it never overflows. */
+  overflow: hidden;
+}
+
+.reel-card {
+  position: absolute;
+  width: clamp(78px, 20vw, 150px);
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 18px;
+  border-radius: 26px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--muted);
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+}
+
+/* The card on the axis is the one in focus. */
+.reel-card.is-centre {
+  border-color: var(--ink);
+  background: var(--surface-2);
+  color: var(--ink);
+  box-shadow: var(--shadow-2);
+  z-index: 5;
+}
+
+.reel-card-icon {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+}
+
+.reel-card-icon svg {
+  width: 46%;
+  height: auto;
+  max-height: 100%;
+  stroke-width: 1.5;
+}
+
+/* The icon sprite: every project's symbol, rendered once off-screen. */
+.reel-sprite {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+.reel-card-name {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: inherit;
+  text-align: center;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  opacity: 0.75;
+}
+
+/* The pointer above the card in focus. */
+.reel-pointer {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 6;
+  width: 0;
+  height: 0;
+  margin: -108px 0 0 -10px;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-top: 12px solid var(--ink);
+}
+
+/* ------------------------------------------------------------------ */
+/* Result — pops up over a blurred background                           */
+/* ------------------------------------------------------------------ */
+.stage-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: color-mix(in srgb, var(--bg) 62%, transparent);
+}
+
+/* While the result is up, the stage behind it blurs rather than disappearing. */
+.stage.is-result .stage-inner,
+.stage.is-result .stage-bar {
+  filter: blur(9px) saturate(0.6);
+  transition: filter 0.3s ease;
+}
+
+.result-pop {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  max-width: 720px;
+  text-align: center;
+}
+
+.result-pop-name {
+  font-size: clamp(30px, 5vw, 58px);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1.06;
+  color: var(--ink);
+}
+
+.result-pop-meta {
+  font-family: var(--font-mono);
   font-size: 12.5px;
+  letter-spacing: 0.04em;
   color: var(--muted);
 }
 
-.header-tools {
-  margin-left: auto;
+.result-pop-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 4px;
+}
+
+/* The pointer belongs to the idle stage; it steps aside for the result. */
+.stage.is-result .reel-pointer {
+  opacity: 0;
+}
+
+/* ------------------------------------------------------------------ */
+/* Drawer — everything that is not the reel                             */
+/* ------------------------------------------------------------------ */
+.drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: color-mix(in srgb, var(--ink) 34%, transparent);
+  backdrop-filter: blur(2px);
+}
+
+.drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 41;
+  width: min(440px, 100%);
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  border-left: 1px solid var(--line);
+  box-shadow: var(--shadow-2);
+}
+
+.drawer-head {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--line);
+}
+
+.drawer-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+.drawer-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.drawer-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.drawer-section + .drawer-section {
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+}
+
+.drawer-foot {
+  gap: 14px;
+}
+
+.drawer-note {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+.drawer-note kbd {
+  display: inline-block;
+  padding: 1px 5px;
+  border-radius: 5px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--ink-2);
 }
 
 /* ------------------------------------------------------------------ */
@@ -359,285 +595,68 @@ button {
 }
 
 /* ------------------------------------------------------------------ */
-/* Machine — now just a surface                                        */
+/* Spin button                                                         */
 /* ------------------------------------------------------------------ */
-.machine {
+.spin-button {
   position: relative;
-  border-radius: var(--radius-lg);
-  padding: 16px;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.machine-plate {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-.machine-plate span {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-.machine-plate em {
-  font-family: var(--font-mono);
-  font-style: normal;
-  font-size: 11px;
-  color: var(--muted);
-}
-
-.machine-main {
-  display: flex;
-  align-items: stretch;
-  gap: 16px;
-}
-
-.reel-shell {
-  position: relative;
-  flex: 1;
-  min-width: 0;
-  border-radius: var(--radius);
-  background: var(--bg);
-  border: 1px solid var(--line);
-  overflow: hidden;
-}
-
-.reel-swipe-hint {
-  display: none;
-  position: absolute;
-  bottom: 6px;
-  left: 0;
-  right: 0;
-  text-align: center;
-  font-size: 11px;
-  color: var(--faint);
-  pointer-events: none;
-}
-
-/* ------------------------------------------------------------------ */
-/* Reel                                                                */
-/* ------------------------------------------------------------------ */
-.reel-window {
-  position: relative;
-  overflow: hidden;
-  background: var(--bg);
-}
-
-.reel-strip {
-  position: absolute;
-  inset: 0 0 auto 0;
-  z-index: 2;
-}
-
-.reel-row {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 12px;
-  padding: 0 18px;
-  color: var(--faint);
-  transition: color 0.12s ease;
+  justify-content: center;
+  gap: 10px;
+  min-width: 190px;
+  padding: 15px 34px;
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  background: var(--ink);
+  color: var(--on-ink);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  transition: opacity 0.15s ease, transform 0.1s ease;
+}
+.spin-button:hover:not(:disabled) {
+  opacity: 0.9;
+}
+.spin-button:active:not(:disabled) {
+  transform: scale(0.97);
+}
+.spin-button:disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+.spin-button-text {
+  font-size: inherit;
+  font-weight: inherit;
+  letter-spacing: inherit;
+}
+.spin-button-arrow {
+  transition: transform 0.2s ease;
+}
+.spin-button:hover:not(:disabled) .spin-button-arrow {
+  transform: translateX(3px);
 }
 
-.reel-row-icon {
-  flex: none;
-  display: grid;
-  place-items: center;
-  color: var(--faint);
-}
-
-.reel-row-name {
-  flex: 1;
-  min-width: 0;
-  font-size: 17px;
-  font-weight: 450;
-  letter-spacing: -0.01em;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.reel-row-cat {
-  flex: none;
+.spin-mode {
+  margin-top: -10px;
+  padding: 4px 10px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
   font-family: var(--font-mono);
   font-size: 11px;
-  color: var(--faint);
+  cursor: pointer;
+  transition: color 0.15s ease;
 }
-
-.reel-row-done {
-  flex: none;
-  color: var(--faint);
-}
-
-.reel-row[data-center="true"] {
+.spin-mode:hover {
   color: var(--ink);
 }
-.reel-row[data-center="true"] .reel-row-name {
-  font-weight: 600;
-}
-.reel-row[data-center="true"] .reel-row-icon,
-.reel-row[data-center="true"] .reel-row-cat {
-  color: var(--muted);
-}
-
-/* Centre band: a single hairline pair, no glow. */
-.reel-band {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 40%;
-  height: 20%;
-  z-index: 1;
-  pointer-events: none;
-  border-top: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
-}
-
-.reel-band-edge {
-  display: none;
-}
-
-.reel-mask {
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 21%;
-  z-index: 3;
-  pointer-events: none;
-}
-.reel-mask-top {
-  top: 0;
-  background: linear-gradient(
-    180deg,
-    var(--bg) 8%,
-    color-mix(in srgb, var(--bg) 70%, transparent) 60%,
-    transparent 100%
-  );
-}
-.reel-mask-bottom {
-  bottom: 0;
-  background: linear-gradient(
-    0deg,
-    var(--bg) 8%,
-    color-mix(in srgb, var(--bg) 70%, transparent) 60%,
-    transparent 100%
-  );
-}
-
-.reel-glass {
-  display: none;
-}
 
 /* ------------------------------------------------------------------ */
-/* Lever — plain rail + knob                                           */
+/* Mode switch                                                         */
 /* ------------------------------------------------------------------ */
-.lever-shell {
-  flex: none;
-  display: grid;
-  place-items: center;
-  width: 64px;
-}
-
-.lever {
-  position: relative;
-  width: 64px;
-  height: 200px;
-  display: grid;
-  place-items: center;
-}
-
-.lever-plate {
-  position: absolute;
-  top: 0;
-  bottom: 22px;
-  left: 50%;
-  width: 40px;
-  transform: translateX(-50%);
-  border-radius: 999px;
-  background: var(--surface-2);
-  border: 1px solid var(--line);
-}
-
-.lever-slot {
-  position: absolute;
-  left: 50%;
-  top: 14px;
-  bottom: 14px;
-  width: 2px;
-  transform: translateX(-50%);
-  border-radius: 999px;
-  background: var(--line-2);
-}
-
-.lever-bolt {
-  display: none;
-}
-
-.lever-handle {
-  position: absolute;
-  inset: 0;
-  background: transparent;
-  border: 0;
-  cursor: grab;
-  touch-action: none;
-  z-index: 2;
-}
-.lever-handle:active {
-  cursor: grabbing;
-}
-.lever-handle:disabled {
-  cursor: not-allowed;
-}
-
-.lever-knob {
-  position: absolute;
-  left: 50%;
-  top: 12px;
-  width: 40px;
-  height: 40px;
-  margin-left: -20px;
-  border-radius: 50%;
-  background: var(--ink);
-  border: 1px solid var(--ink);
-  box-shadow: var(--shadow-1);
-}
-.lever-knob-shine {
-  display: none;
-}
-
-.lever-stem {
-  display: none;
-}
-
-.lever-hint {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  text-align: center;
-  font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--faint);
-}
-
-/* ------------------------------------------------------------------ */
-/* Machine controls                                                    */
-/* ------------------------------------------------------------------ */
-.machine-controls {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
 .mode-switch {
   display: inline-flex;
   gap: 2px;
@@ -645,6 +664,7 @@ button {
   border-radius: 999px;
   background: var(--surface-2);
   border: 1px solid var(--line);
+  align-self: flex-start;
 }
 
 .mode-button {
@@ -669,58 +689,9 @@ button {
   box-shadow: var(--shadow-1);
 }
 
-.spin-button {
-  position: relative;
-  margin-left: auto;
-  flex: 1;
-  min-width: 160px;
-  max-width: 300px;
-  padding: 11px 24px;
-  border: 1px solid var(--ink);
-  border-radius: 999px;
-  cursor: pointer;
-  display: flex;
-  align-items: baseline;
-  justify-content: center;
-  gap: 8px;
-  background: var(--ink);
-  color: var(--on-ink);
-  transition: opacity 0.15s ease, transform 0.1s ease;
-}
-.spin-button:hover:not(:disabled) {
-  opacity: 0.88;
-}
-.spin-button:active:not(:disabled) {
-  transform: scale(0.99);
-}
-.spin-button:disabled {
-  cursor: default;
-  opacity: 0.45;
-}
-.spin-button-glow {
-  display: none;
-}
-.spin-button-text {
-  font-size: 15px;
-  font-weight: 600;
-  letter-spacing: 0.01em;
-}
-.spin-button-sub {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  opacity: 0.6;
-}
-
 /* ------------------------------------------------------------------ */
 /* Result                                                              */
 /* ------------------------------------------------------------------ */
-.result-region {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  min-height: 80px;
-}
-
 .result-placeholder {
   margin: 0;
   padding: 28px 20px;
@@ -1654,99 +1625,71 @@ button {
 }
 
 /* ------------------------------------------------------------------ */
-/* Footer                                                              */
-/* ------------------------------------------------------------------ */
-.arcade-footer {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  align-items: center;
-  text-align: center;
-  padding-top: 24px;
-  border-top: 1px solid var(--line);
-  font-size: 12.5px;
-  color: var(--muted);
-}
-.arcade-footer kbd {
-  display: inline-block;
-  padding: 1px 6px;
-  margin: 0 1px;
-  border-radius: 5px;
-  background: var(--surface-2);
-  border: 1px solid var(--line);
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--ink-2);
-}
-.footer-note {
-  color: var(--faint);
-}
-
-/* ------------------------------------------------------------------ */
 /* Responsive                                                          */
 /* ------------------------------------------------------------------ */
 @media (max-width: 640px) {
-  .arcade-content {
-    padding: 24px 14px 56px;
-    gap: 20px;
+  .stage {
+    padding: 20px 12px 32px;
   }
 
-  .machine {
-    padding: 12px;
-    gap: 12px;
+  .stage-inner {
+    gap: 18px;
   }
 
-  .machine-main {
-    gap: 10px;
-  }
-
-  .lever-shell {
-    width: 48px;
-  }
-  .lever {
-    width: 48px;
-    height: 160px;
-  }
-  .lever-plate {
-    width: 32px;
-  }
-  .lever-knob {
+  .stage-toggle {
+    top: 10px;
+    right: 10px;
     width: 32px;
     height: 32px;
-    margin-left: -16px;
+  }
+
+  .drawer {
+    width: 100%;
+    border-left: 0;
+  }
+
+  .drawer-head {
+    padding: 12px 14px;
+  }
+
+  .drawer-body {
+    padding: 14px;
+    gap: 18px;
   }
 
   .reel-row {
     padding: 0 12px;
-    gap: 8px;
   }
   .reel-row-name {
     font-size: 15px;
   }
-  .reel-row-cat {
-    display: none;
-  }
-  .reel-swipe-hint {
-    display: block;
+  .reel-row[data-center="true"] .reel-row-name {
+    font-size: 18px;
   }
 
-  .machine-controls {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 10px;
+  .result-bar {
+    padding: 9px 12px;
+    gap: 8px;
   }
+  .result-bar-name {
+    font-size: 13.5px;
+  }
+  .result-bar-meta {
+    display: none;
+  }
+
+  .spin-button {
+    padding: 12px 20px;
+  }
+
   .mode-switch {
+    align-self: stretch;
     justify-content: space-between;
   }
   .mode-button {
     flex: 1;
     justify-content: center;
     padding: 6px;
-  }
-  .spin-button {
-    margin-left: 0;
-    max-width: none;
-    min-width: 0;
   }
 
   .result-card {

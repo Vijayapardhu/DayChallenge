@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
+import { registerOverlay } from "@/lib/overlays";
 import { cn } from "@/lib/utils";
 
 interface ModalProps {
@@ -28,13 +29,8 @@ export function Modal({
 
   useEffect(() => {
     if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        e.stopPropagation();
-        onClose();
-      }
-    };
-    window.addEventListener("keydown", onKey);
+    // Escape closes the top-most overlay only (see lib/overlays).
+    const unregister = registerOverlay(onClose);
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     const t = window.setTimeout(() => {
@@ -43,7 +39,7 @@ export function Modal({
         ?.focus();
     }, 60);
     return () => {
-      window.removeEventListener("keydown", onKey);
+      unregister();
       document.body.style.overflow = prevOverflow;
       window.clearTimeout(t);
     };

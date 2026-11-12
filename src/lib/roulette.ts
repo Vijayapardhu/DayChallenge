@@ -8,7 +8,7 @@
  */
 
 /** Number of rows visible in the reel window (odd, so one sits dead centre). */
-export const VISIBLE_ROWS = 5;
+export const VISIBLE_ROWS = 9;
 /** Strip index that lines up with the centre of the window. */
 export const CENTER_SLOT = Math.floor(VISIBLE_ROWS / 2);
 
