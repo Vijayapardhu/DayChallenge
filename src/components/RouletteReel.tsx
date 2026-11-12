@@ -55,42 +55,47 @@ function fisheye(d: number, card: number, spread: number) {
   const ad = Math.abs(d);
   const sign = d < 0 ? -1 : 1;
 
-  // Cards overlap slightly, like a hand of cards held in a curve.
-  const gap = card * 0.8 * spread;
-  const curve = card * 0.08 * spread;
+  // Cards overlap tightly, like a hand of cards held in a curve.
+  const gap = card * 0.56 * spread;
+  const curve = card * 0.05 * spread;
 
   return {
     x: sign * (gap * ad + curve * ad * ad),
-    y: card * 0.085 * Math.pow(ad, 1.5),
-    z: -card * 0.2 * ad,
+    y: card * 0.04 * Math.pow(ad, 1.5),
+    z: -card * 0.14 * ad,
     rotateY: -sign * Math.min(MAX_TILT, TILT_PER_STEP * ad),
-    scale: 1 / (1 + 0.08 * ad),
-    opacity: Math.max(0.1, 1 - 0.22 * ad),
+    scale: 1 / (1 + 0.06 * ad),
+    opacity: Math.max(0.22, 1 - 0.17 * ad),
   };
 }
 
 /**
- * A single card. The icon and the name are written straight to the DOM while
- * the reel turns, so React never re-renders during a spin.
+ * A single card. Memoised, and given a stable ref callback, so that spinning
+ * the reel only re-renders the one card whose project actually changed.
  */
 const ReelCard = memo(function ReelCard({
+  challenge,
   setRef,
-  iconRef,
-  nameRef,
 }: {
+  challenge: Challenge | undefined;
   setRef: (el: HTMLDivElement | null) => void;
-  iconRef: (el: HTMLSpanElement | null) => void;
-  nameRef: (el: HTMLSpanElement | null) => void;
 }) {
+  const Icon = challenge
+    ? (PROJECT_ICONS[challenge.id] ?? PROJECT_FALLBACK)
+    : PROJECT_FALLBACK;
+
   return (
     <div
       className="reel-card"
       ref={setRef}
       role="option"
       aria-selected={false}
+      aria-label={challenge?.name ?? ""}
+      data-cat={challenge?.category}
     >
-      <span className="reel-card-icon" ref={iconRef} />
-      <span className="reel-card-name" ref={nameRef} />
+      <span className="reel-card-icon">
+        <Icon strokeWidth={1.4} aria-hidden />
+      </span>
     </div>
   );
 });
@@ -104,10 +109,7 @@ export function RouletteReel({
   onComplete,
 }: RouletteReelProps) {
   const cardRefs = useRef<Array<HTMLDivElement | null>>([]);
-  const iconRefs = useRef<Array<HTMLSpanElement | null>>([]);
-  const nameRefs = useRef<Array<HTMLSpanElement | null>>([]);
   const reelRef = useRef<HTMLDivElement | null>(null);
-  const spriteRef = useRef<HTMLDivElement | null>(null);
   const busyRef = useRef(false);
   const runTokenRef = useRef<number | null>(null);
 
@@ -115,8 +117,9 @@ export function RouletteReel({
   const slotIdxRef = useRef<number[]>([]);
   /** The pool index currently on the axis. */
   const focusRef = useRef(0);
-  /** The challenge each card last showed, so we only rewrite on a change. */
-  const slotShownRef = useRef<string[]>([]);
+
+  /** The challenge shown by each card. */
+  const [cards, setCards] = useState<Challenge[]>(() => []);
 
   /** Card size, measured so the reel scales with the viewport. */
   const cardSizeRef = useRef(150);
@@ -146,35 +149,15 @@ export function RouletteReel({
       ),
     [],
   );
-  const iconSetters = useMemo(
-    () =>
-      Array.from(
-        { length: SLOT_COUNT },
-        (_, i) => (el: HTMLSpanElement | null) => {
-          iconRefs.current[i] = el;
-        },
-      ),
-    [],
-  );
-  const nameSetters = useMemo(
-    () =>
-      Array.from(
-        { length: SLOT_COUNT },
-        (_, i) => (el: HTMLSpanElement | null) => {
-          nameRefs.current[i] = el;
-        },
-      ),
-    [],
-  );
-
-  /* ---------------- measurement ---------------------------------------- */
-  useEffect(() => {
+  /* ---------------- measurement ---------------------------------------- */  useEffect(() => {
     const el = cardRefs.current[0];
     const reel = reelRef.current;
     if (!el || !reel) return;
 
     const measure = () => {
-      const w = el.getBoundingClientRect().width;
+      // offsetWidth is the layout width; getBoundingClientRect would report
+      // the scaled width of a card that is already tilted and shrunk.
+      const w = el.offsetWidth;
       if (w <= 0) return;
       cardSizeRef.current = w;
 
@@ -192,59 +175,14 @@ export function RouletteReel({
     return () => ro.disconnect();
   }, []);
 
-  /* ---------------- icon sprite ------------------------------------------ */
-  /**
-   * Each project has its own lucide symbol. The symbols are rendered once
-   * into a hidden sprite, then cloned into the cards as the reel turns —
-   * that keeps React out of the animation entirely.
-   */
-  const spriteRefMap = useRef<Map<string, string>>(new Map());
-
-  useEffect(() => {
-    const sprite = spriteRef.current;
-    if (!sprite) return;
-    const map = new Map<string, string>();
-    for (const holder of Array.from(sprite.children)) {
-      const id = holder.getAttribute("data-icon");
-      const svg = holder.querySelector("svg");
-      if (id && svg) map.set(id, svg.outerHTML);
-    }
-    spriteRefMap.current = map;
-    // The cards may already be showing content; refresh them with the sprite.
-    for (let i = 0; i < SLOT_COUNT; i += 1) {
-      const index = slotIdxRef.current[i];
-      if (index === undefined) continue;
-      const challenge = poolRef.current[modIndex(index, poolRef.current.length)];
-      if (challenge) writeSlot(i, challenge);
-    }
-  }, []);
-
   /* ---------------- content -------------------------------------------- */
   const writeSlot = (slot: number, challenge: Challenge) => {
-    if (slotShownRef.current[slot] === challenge.id) return;
-    slotShownRef.current[slot] = challenge.id;
-
-    const el = cardRefs.current[slot];
-    if (el) {
-      el.setAttribute("aria-label", challenge.name);
-      el.dataset.cat = challenge.category;
-    }
-
-    const icon = iconRefs.current[slot];
-    if (icon) {
-      const markup =
-        spriteRefMap.current.get(challenge.id) ??
-        spriteRefMap.current.get("__fallback") ??
-        "";
-      if (icon.dataset.id !== challenge.id) {
-        icon.dataset.id = challenge.id;
-        icon.innerHTML = markup;
-      }
-    }
-    const label = nameRefs.current[slot];
-    if (label && label.textContent !== challenge.name) {
-      label.textContent = challenge.name;
-    }
+    setCards((prev) => {
+      if (prev[slot]?.id === challenge.id) return prev;
+      const next = prev.slice();
+      next[slot] = challenge;
+      return next;
+    });
   };
 
   /* ---------------- layout --------------------------------------------- */
@@ -429,36 +367,17 @@ export function RouletteReel({
   }, [run]);
 
   return (
-    <>
-      <div
-        className="reel"
-        ref={reelRef}
-        role="listbox"
-        aria-label="Challenge roulette"
-        aria-live="off"
-      >
-        {Array.from({ length: SLOT_COUNT }).map((_, i) => (
-          <ReelCard
-            key={i}
-            setRef={cardSetters[i]}
-            iconRef={iconSetters[i]}
-            nameRef={nameSetters[i]}
-          />
-        ))}
-        <span className="reel-pointer" aria-hidden />
-      </div>
-
-      {/* Every project's symbol, rendered once and cloned into the cards. */}
-      <div className="reel-sprite" ref={spriteRef} aria-hidden>
-        {Object.entries(PROJECT_ICONS).map(([id, Icon]) => (
-          <span key={id} data-icon={id}>
-            <Icon strokeWidth={1.5} aria-hidden />
-          </span>
-        ))}
-        <span data-icon="__fallback">
-          <PROJECT_FALLBACK strokeWidth={1.5} aria-hidden />
-        </span>
-      </div>
-    </>
+    <div
+      className="reel"
+      ref={reelRef}
+      role="listbox"
+      aria-label="Challenge roulette"
+      aria-live="off"
+    >
+      {Array.from({ length: SLOT_COUNT }).map((_, i) => (
+        <ReelCard key={i} challenge={cards[i]} setRef={cardSetters[i]} />
+      ))}
+      <span className="reel-pointer" aria-hidden />
+    </div>
   );
 }
